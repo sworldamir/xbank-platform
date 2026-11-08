@@ -1,18 +1,24 @@
 {
   "name": "xbank-platform",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently -k \"node server/index.mjs\" \"vite --host 0.0.0.0\"",
-    "build": "vite build",
-    "start": "node server/index.mjs",
-    "preview": "vite preview --host 0.0.0.0"
+    "dev": "concurrently -k \"node --env-file=.env server/index.mjs\" \"vite --host 0.0.0.0\"",
+    "build": "tsc --noEmit && vite build",
+    "start": "node --env-file=.env server/index.mjs",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "node --test",
+    "db:migrate": "node --env-file=.env scripts/migrate.mjs",
+    "admin:create": "node --env-file=.env scripts/create-admin.mjs",
+    "seed:site": "node --env-file=.env scripts/seed-site.mjs"
   },
   "dependencies": {
     "lucide-react": "0.468.0",
+    "pg": "^8.13.1",
     "react": "19.0.0",
-    "react-dom": "19.0.0"
+    "react-dom": "19.0.0",
+    "nodemailer": "^6.9.16"
   },
   "devDependencies": {
     "@types/react": "19.0.3",

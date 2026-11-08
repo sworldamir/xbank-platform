@@ -1,12 +1,48 @@
 services:
+  db:
+    image: postgres:17-alpine
+    container_name: xbank-postgres
+    environment:
+      POSTGRES_DB: xbank
+      POSTGRES_USER: xbank
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - xbank_pgdata:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U xbank -d xbank"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
   xbank:
     build: .
-    container_name: xbank-demo
-    ports:
-      - "3000:3000"
+    container_name: xbank-app
     environment:
-      PORT: 3000
-      DATA_FILE: /app/data/db.json
-    volumes:
-      - ./data:/app/data
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgresql://xbank:${POSTGRES_PASSWORD}@db:5432/xbank
+      DATABASE_SSL: "false"
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000}
+      FINANCIAL_OPERATIONS_ENABLED: ${FINANCIAL_OPERATIONS_ENABLED:-false}
+      LEGAL_COMPLIANCE_APPROVAL_ID: ${LEGAL_COMPLIANCE_APPROVAL_ID:-}
+      EMAIL_VERIFICATION_REQUIRED: ${EMAIL_VERIFICATION_REQUIRED:-true}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:3000}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      MAIL_FROM: ${MAIL_FROM:-}
+      ALLOW_MANUAL_LEDGER_ADJUSTMENTS: ${ALLOW_MANUAL_LEDGER_ADJUSTMENTS:-false}
+    ports:
+      - "3000:4000"
+    depends_on:
+      db:
+        condition: service_healthy
     restart: unless-stopped
+
+volumes:
+  xbank_pgdata:

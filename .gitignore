@@ -1,6 +1,10 @@
 node_modules/
 dist/
 .env
+.env.*
+!.env.example
 .DS_Store
 npm-debug.log*
-data/db.json
+coverage/
+data/
+*.log
